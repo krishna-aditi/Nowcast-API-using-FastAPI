@@ -37,11 +37,11 @@ matplotlib 3.2.0
 #### Sample outputs
 1. Test case 1:
 
-![](https://myoctocat.com/assets/images/base-octocat.svg)
+![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_30.54711887_-92.28496258.gif)
 
 2. Test case 2:
 
-![](https://myoctocat.com/assets/images/base-octocat.svg)
+![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_37.318363_-84.224203.gif)
 
 #### References
 - First Steps - FastAPI (https://fastapi.tiangolo.com/tutorial/first-steps/)
