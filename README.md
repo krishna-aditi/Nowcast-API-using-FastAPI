@@ -5,7 +5,8 @@ Report link (GoogleDoc): https://docs.google.com/document/d/1XSUotbV7bAod1QYp7f2
 
 ============================================================
 
-Weather briefing is a vital part of any flight preparation. The National Weather Service (NWS), Federal Aviation Administration (FAA), Department of Defense and other aviation groups are responsible for coherent and accurate weather reporting. The combined efforts of thorough scientific study and modeling techniques are able to predict the weather patterns with increasing accuracy. These weather forecasts enable pilots to make informed decisions regarding weather and flight safety. 
+Weather briefing is a vital part of any flight preparation. The National Weather Service (NWS), Federal Aviation Administration (FAA), Department of Defense and other aviation groups are responsible for coherent and accurate weather reporting. The combined efforts of thorough scientific study and modeling techniques are able to predict the weather patterns with increasing accuracy. These weather forecasts enable pilots to make informed decisions regarding weather and flight safety.
+
 ### Weather Radar Observations
 The weather radar data is provided by the national network of WSR-88D (NEXRAD) radars. This data is the major source of weather sensing used for Nowcasting. The WSR-88D (NEXRAD), also known as the Doppler Radar has two operational modes- clear air and precipitation. The mode is changed based on the weather condition. 
 
@@ -15,6 +16,7 @@ A better approach to solving this problem is by using the SEVIR Nowcast model wh
 #### Objective
 
 The goal of the project is to implement a REST API to execute the GAN model, which takes a sequence of 13 images as input and generates 12 images as output. The end users, who are a bunch of developers who want to integrate our API with their system, pass a JSON file as a blueprint with all required parameters through CURL, POSTMAN, or a Python-Client to execute the model. 
+
 #### Assumptions
 
 Scope for false alarms or misses
@@ -28,15 +30,15 @@ The API can be used as a foundation to be built upon and integrated with the exi
 
 To test pretrained models and train API requires 
 ```
-Python 3.7
-tensorflow 2.1.0
-pandas
-numpy
+- Python 3.7
+- tensorflow 2.1.0
+- pandas
+- numpy
 ```
 To visualize the outputs basemap library is required, which needs to following libraries
 ```
-h5py 2.8.0
-matplotlib 3.2.0
+- h5py 2.8.0
+- matplotlib 3.2.0
 ```
 #### Sample outputs
 
