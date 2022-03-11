@@ -1,8 +1,8 @@
 SEVIR Nowcast API using FastAPI web-framework
 ============================================================
+
 Report link (GoogleDoc): https://docs.google.com/document/d/1XSUotbV7bAod1QYp7f28zVP2qf2TTP5Fij_wSKRQ-ww/edit?usp=sharing
 
-Codelabs link: 
 ============================================================
 Weather briefing is a vital part of any flight preparation. The National Weather Service (NWS), Federal Aviation Administration (FAA), Department of Defense and other aviation groups are responsible for coherent and accurate weather reporting. The combined efforts of thorough scientific study and modeling techniques are able to predict the weather patterns with increasing accuracy. These weather forecasts enable pilots to make informed decisions regarding weather and flight safety. 
 ### Weather Radar Observations
@@ -34,6 +34,15 @@ To visualize the outputs basemap library is required, which needs to following l
 h5py 2.8.0
 matplotlib 3.2.0
 ```
+#### Sample outputs
+1. Test case 1:
+
+![](https://myoctocat.com/assets/images/base-octocat.svg)
+
+2. Test case 2:
+
+![](https://myoctocat.com/assets/images/base-octocat.svg)
+
 #### References
 - First Steps - FastAPI (https://fastapi.tiangolo.com/tutorial/first-steps/)
 - Talks # 8: Sebastián Ramírez; Build a machine learning API  from scratch  with FastAPI (https://www.youtube.com/watch?v=1zMQBe0l1bM&ab_channel=AbhishekThakur)
@@ -86,3 +95,9 @@ Project Organization
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+
+--------
+
+#### Submitted by:
+
+![image](https://user-images.githubusercontent.com/37017771/153502035-dde7b1ec-5020-4505-954a-2e67528366e7.png)
