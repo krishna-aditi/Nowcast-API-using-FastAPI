@@ -4,6 +4,7 @@ SEVIR Nowcast API using FastAPI web-framework
 Report link (GoogleDoc): https://docs.google.com/document/d/1XSUotbV7bAod1QYp7f28zVP2qf2TTP5Fij_wSKRQ-ww/edit?usp=sharing
 
 ============================================================
+
 Weather briefing is a vital part of any flight preparation. The National Weather Service (NWS), Federal Aviation Administration (FAA), Department of Defense and other aviation groups are responsible for coherent and accurate weather reporting. The combined efforts of thorough scientific study and modeling techniques are able to predict the weather patterns with increasing accuracy. These weather forecasts enable pilots to make informed decisions regarding weather and flight safety. 
 ### Weather Radar Observations
 The weather radar data is provided by the national network of WSR-88D (NEXRAD) radars. This data is the major source of weather sensing used for Nowcasting. The WSR-88D (NEXRAD), also known as the Doppler Radar has two operational modes- clear air and precipitation. The mode is changed based on the weather condition. 
@@ -12,8 +13,10 @@ The NEXRAD radar image is not real time and can be upto 5 minutes old. If these 
 A better approach to solving this problem is by using the SEVIR Nowcast model which predicts a sequence of 12 images corresponding to the next hour of weather, based on the previously captured 13 images sampled at 5 minute intervals. 
 
 #### Objective
+
 The goal of the project is to implement a REST API to execute the GAN model, which takes a sequence of 13 images as input and generates 12 images as output. The end users, who are a bunch of developers who want to integrate our API with their system, pass a JSON file as a blueprint with all required parameters through CURL, POSTMAN, or a Python-Client to execute the model. 
 #### Assumptions
+
 Scope for false alarms or misses
 Area of interest parameters, i.e. llcrnrlat, llcrnrlon, urcrnrlat, urcrnrlon format match the ones stored in the CATALOG.csv file
 Data is available for the user specified datatime input
@@ -22,6 +25,7 @@ Enough time to download the specific raw data (h5 file) for the user specified p
 The API can be used as a foundation to be built upon and integrated with the existing Electronic Flight Display (EFD) or Multi-Function Display (MFD) that gives the pilot access to several data links to weather services that are made available through multiple resources. Along with Graphical NEXRAD data, city forecast data, graphical wind data, the system will also have near-term forecasted images for the requested area of interest and time.
 
 #### Requirements
+
 To test pretrained models and train API requires 
 ```
 Python 3.7
@@ -35,6 +39,7 @@ h5py 2.8.0
 matplotlib 3.2.0
 ```
 #### Sample outputs
+
 1. Test case 1:
 
 ![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_30.54711887_-92.28496258.gif)
@@ -44,6 +49,7 @@ matplotlib 3.2.0
 ![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_37.318363_-84.224203.gif)
 
 #### References
+
 - First Steps - FastAPI (https://fastapi.tiangolo.com/tutorial/first-steps/)
 - Talks # 8: Sebastián Ramírez; Build a machine learning API  from scratch  with FastAPI (https://www.youtube.com/watch?v=1zMQBe0l1bM&ab_channel=AbhishekThakur)
 - making gif from images using imageio in python - Stack Overflow (https://stackoverflow.com/questions/41228209/making-gif-from-images-using-imageio-in-python)
