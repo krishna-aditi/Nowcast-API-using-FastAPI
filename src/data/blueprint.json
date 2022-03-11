@@ -1,0 +1,12 @@
+{
+ "llcrnrlat":37.318363,
+ "llcrnrlon":-84.224203, 
+ "urcrnrlat":40.087573 ,
+ "urcrnrlon":-79.052692,
+ "time_utc":"2019-06-02 18:33:00",
+ "out_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-3\\SEVIR API\\Working code",
+ "catalog_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-3\\SEVIR API\\Working code\\CATALOG.csv",
+ "data_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-3\\SEVIR API\\Working code\\sevir",
+ "model_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-3\\SEVIR API\\Working code\\models\\nowcast",
+ "model_type":"gan"
+}
