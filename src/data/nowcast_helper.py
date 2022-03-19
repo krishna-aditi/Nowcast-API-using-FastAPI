@@ -7,78 +7,93 @@ Created on Mon Mar  7 10:59:57 2022
 """
 import tensorflow as tf
 import numpy as np
-import datetime
 import os
 import h5py
-from nowcast_utils import SEVIRSequence
 import dateutil.parser
 import matplotlib as mpl
-mpl.use("TkAgg")
+import pandas as pd
+from geopy import distance
+import imageio
 import matplotlib.pyplot as plt
 plt.rcParams["figure.figsize"] = (10,10)
 
+##############################################################################
+# Filtering Catalog 
+
+'''
+lat = 37.318363
+lon = -84.224203 
+time ="2019-06-02 18:33:00"
+radius = 100
+sevir_catalog = "C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-4\\CATALOG.csv"
+closest_radius = False
+'''
+
+def filterCatalog(lat, lon, radius, time_utc, catalog_path, closest_radius):
+    # read catalog
+    catalog = pd.read_csv(catalog_path, parse_dates = ['time_utc'], low_memory = False)
+    
+    # parse date
+    time = dateutil.parser.parse(time_utc)
+    
+    # image_type filter
+    catalog = catalog[catalog.img_type == 'vil']
+    
+    # datetime filter
+    catalog = catalog.loc[(catalog.time_utc.dt.hour <= time.hour)&(catalog.time_utc.dt.hour >= time.hour - 1)]
+    
+    catalog = catalog[catalog.pct_missing == 0]
+    if len(catalog) == 0:
+        raise Exception('Catalog Error: Requested time not present in the given location')
+    
+    # aoi filter, get center lat/lon
+    catalog['cntrlat'] = catalog.apply(lambda row: (row.llcrnrlat + row.urcrnrlat)/2, axis=1)
+    catalog['cntrlon'] = catalog.apply(lambda row: (row.llcrnrlon + row.urcrnrlon)/2, axis=1)
+    
+    # applying geopy.diatance.distance
+    catalog['distance'] = catalog.apply(lambda row: distance.distance((row.cntrlat,row.cntrlon), (lat,lon)).miles, axis=1)
+    catalog = catalog.sort_values(by=['distance'])
+    
+    # next closest point check
+    if closest_radius == True:
+        close_dist = catalog.iloc[0].distance
+        catalog = catalog[catalog.distance <= close_dist]
+    else:
+        catalog = catalog[catalog.distance < radius]
+        if len(catalog) == 0:
+            raise Exception('Catalog Error: Requested location not present in the given radius. Try increasing the radius or set closest_radius=True in the query')
+    
+    catalog = catalog.iloc[0]
+    return str(catalog.file_name), int(catalog.file_index)
+
 ############################################################################## 
-# make_nowcast_dataset file class and function copied here
-# Use make_nowcast_generator file functions for filtering
+# Read Data from filename and index
 
-class NowcastGenerator(SEVIRSequence):
-    """
-    Generator that loads full VIL sequences, and spilts each
-    event into three training samples, each 12 frames long.
-
-    Event Frames:  [-----------------------------------------------]
-                   [----13-----][---12----]
-                               [----13----][----12----]
-                                          [-----13----][----12----]
-    """
-    # Splitting into sequence
-    def __getitem__(self, idx):
-        """
-
-        """
-        X,_ = super(NowcastGenerator, self).__getitem__(idx)  # N,L,W,49
-        x1,x2,x3 = X[0][:,:,:,:13],X[0][:,:,:,12:25],X[0][:,:,:,24:37]
-        y1,y2,y3 = X[0][:,:,:,13:25],X[0][:,:,:,25:37],X[0][:,:,:,37:49]
-        Xnew = np.concatenate((x1,x2,x3),axis=0)
-        Ynew = np.concatenate((y1,y2,y3),axis=0)
-        return [Xnew],[Ynew]
- 
-# lat/lon as additional parameters used for filtering
-
-def get_nowcast_test_generator(sevir_catalog,
-                           sevir_location,
-                           llcrnrlat, llcrnrlon, urcrnrlat, urcrnrlon, time_utc,
-                           batch_size=8,
-                           start_date=datetime.datetime(2019,6,1),
-                           end_date=None):
-    #time_utc = '2012-03-01T10:00:00Z'
-    filt = lambda c:  np.logical_and(c.pct_missing==0, np.logical_and(np.logical_and(round(c.llcrnrlat, 3) == round(llcrnrlat, 3), round(c.llcrnrlon, 3) == round(llcrnrlon, 3)), np.logical_and(round(c.urcrnrlat, 3) == round(urcrnrlat, 3), round(c.urcrnrlon, 3) == round(urcrnrlon, 3))))
-    user_time = dateutil.parser.parse(time_utc)
-    datetime_filt = lambda t: np.logical_and(t.dt.hour <= user_time.hour, t.dt.hour >= user_time.hour - 1)
-    return NowcastGenerator(catalog = sevir_catalog,
-                            sevir_data_home = sevir_location,
-                            x_img_types = ['vil'],
-                            y_img_types = ['vil'],
-                            batch_size = batch_size,
-                            start_date = start_date,
-                            end_date = end_date,
-                            catalog_filter = filt,
-                            datetime_filter = datetime_filt)
+def readData(filename, fileindex, data_path):
+    file = os.path.join(data_path, filename)
+    if not os.path.exists(file):
+        raise Exception(f'Data Error: {file} does not exist')
+    try:
+        f = h5py.File(file,'r')
+        data = f['vil'][fileindex]
+        x1,x2,x3 = data[:,:,:13], data[:,:,13:26], data[:,:,26:39]
+    except Exception:
+        raise Exception(f'Data Error: {file} is corrupt. Please request another time or AOI')
+    return np.stack((x1,x2,x3))  
 
 ############################################################################## 
 # Defining our own data generator with the help of make_nowcast_dataset 
 # Functions to filter the catalog and reading data in desired format
 
-def get_nowcast_data(llcrnrlat, llcrnrlon, urcrnrlat, urcrnrlon, time_utc,catalog_path, data_path):
-    tst_generator = get_nowcast_test_generator(sevir_catalog = catalog_path,
-                                               sevir_location = data_path,
-                                               llcrnrlat = llcrnrlat, llcrnrlon = llcrnrlon,
-                                               urcrnrlat = urcrnrlat, urcrnrlon = urcrnrlon, 
-                                               time_utc = time_utc)
-    # tst_generator returns a SEVIRSequence class
-    X, Y = tst_generator.__getitem__(0)
-    # Array of 13 images input
-    return np.array(X)
+def get_nowcast_data(lat, lon, radius, time_utc, catalog_path, data_path,closest_radius):
+    
+    try:    
+        filename, fileindex = filterCatalog(lat, lon, radius, time_utc, catalog_path, closest_radius)
+        data = readData(filename, fileindex, data_path)
+    except Exception as e:
+        raise Exception(e)
+    
+    return data
 
 ##############################################################################
 # Display VIL images through matplotlib
@@ -126,31 +141,36 @@ def vil_cmap(encoded = True):
 # Create multiple temporary images of VIL and save as GIF, then delete temp files
 
 def save_gif(data, file_name, time_utc):
-    count = 0
-    # From visualize_result function in AnalyzeNowcast notebook
-    cmap_dict = lambda s: {'cmap':get_cmap(s,encoded=True)[0],
-                            'norm':get_cmap(s,encoded=True)[1],
-                            'vmin':get_cmap(s,encoded=True)[2],
-                            'vmax':get_cmap(s,encoded=True)[3]}
-    filenames = []
-    for pred in data:
-        for i in range(pred.shape[-1]):
-            plt.imshow(pred[:,:,i],**cmap_dict('vil'))
-            # plt.imshow(pred[:,:,i],cmap="gist_heat")
-#            plt.colorbar(c)
-            plt.axis('off')
-            plt.title(f'Nowcast prediction at time {time_utc}+{(count+1)*5}minutes')
-            plt.savefig(f"Pred_{time_utc.replace(':','')}_{count}.png", bbox_inches='tight')
-            plt.close()
-            filenames.append(f"Pred_{time_utc.replace(':','')}_{count}.png")
-            count+=1
-    # Saving files as GIF (https://stackoverflow.com/questions/41228209/making-gif-from-images-using-imageio-in-python)
-    import imageio
-    images = []
-    for filename in filenames:
-        images.append(imageio.imread(filename))
-        os.remove(filename)
-    imageio.mimsave(file_name, images)
+    try:
+        count = 0
+        # From visualize_result function in AnalyzeNowcast notebook
+        cmap_dict = lambda s: {'cmap':get_cmap(s,encoded=True)[0],
+                                'norm':get_cmap(s,encoded=True)[1],
+                                'vmin':get_cmap(s,encoded=True)[2],
+                                'vmax':get_cmap(s,encoded=True)[3]}
+        filenames = []
+        for pred in data:
+            for i in range(pred.shape[-1]):
+                plt.imshow(pred[:,:,i],**cmap_dict('vil'))
+                # plt.imshow(pred[:,:,i],cmap="gist_heat")
+    #            plt.colorbar(c)
+                plt.axis('off')
+                plt.title(f'Nowcast prediction at time {time_utc}+{(count+1)*5}minutes')
+                plt.savefig(f"Pred_{time_utc.replace(':','')}_{count}.png", bbox_inches='tight')
+                plt.close()
+                filenames.append(f"Pred_{time_utc.replace(':','')}_{count}.png")
+                count+=1
+        # Saving files as GIF (https://stackoverflow.com/questions/41228209/making-gif-from-images-using-imageio-in-python)
+    except:
+        raise Exception('IO Error: Could not write GIF. Try reinstalling matplotlib (version<=3.2.0)')
+    try:    
+        images = []
+        for filename in filenames:
+            images.append(imageio.imread(filename))
+            os.remove(filename)
+        imageio.mimsave(file_name, images)
+    except:
+        raise Exception('IO Error: Could not write GIF. Check imageio library in your environment')
     return file_name
 
 
@@ -159,41 +179,49 @@ def save_gif(data, file_name, time_utc):
 # Saving the model's output as h5
 
 def save_h5(data, file_name):
-    hf = h5py.File(file_name, 'w')
-    hf.create_dataset('nowcast_predict', data = data)
-    hf.close()
+    try:
+        hf = h5py.File(file_name, 'w')
+        hf.create_dataset('nowcast_predict', data = data)
+        hf.close()
+    except:
+        raise Exception('IO Error: Could not write H5 file. Check the out_path correctly or try reinstalling h5py')
     return file_name
 
 ##############################################################################
 # Initializing and running the model
 # Link to download pre-trained model (https://www.dropbox.com/s/9y3m4axfc3ox9i7/gan_generator.h5?dl=0Downloading%20mse_and_style.h5)
 
-def run_model(data, model_path, scale=False, model_type='gan'):
+def run_model(data, model_path, scale, model_type):
     MEAN=33.44
     SCALE=47.54
     data = (data.astype(np.float32)-MEAN)/SCALE
     norm = {'scale':47.54, 'shift':33.44}
+    file = None
     # Model type
-    if model_type == 'gan':
-        file = os.path.join(model_path, 'gan_generator.h5')
-        model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
-    elif model_type == 'mse':    
-        file  = os.path.join(model_path, 'mse_model.h5')
-        model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
-    elif model_type == 'style':    
-        file = os.path.join(model_path, 'style_model.h5')
-        model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
-    elif model_type in ['mse+style', 'style+mse']:    
-        file = os.path.join(model_path, 'mse_and_style.h5')
-        model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
-    else:
-        raise Exception('Did not find the specified model for nowcast!')
-    
+    try:
+        if model_type == 'gan':
+            file = os.path.join(model_path, 'gan_generator.h5')
+            model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
+        elif model_type == 'mse':    
+            file  = os.path.join(model_path, 'mse_model.h5')
+            model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
+        elif model_type == 'style':    
+            file = os.path.join(model_path, 'style_model.h5')
+            model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
+        elif model_type in ['mse+style', 'style+mse']:    
+            file = os.path.join(model_path, 'mse_and_style.h5')
+            model = tf.keras.models.load_model(file, compile=False, custom_objects = {"tf": tf})
+        else:
+            raise Exception('Model Error: Did not find the specified model for nowcast!')
+    except:
+        raise Exception(f'Model Error: Model file {model_type} does not exist')
+        
     # Output
-    output = model.predict(data[0])
-    if isinstance(output,(list,)):
-        output=output[0]
-    if scale:
-        output = output*norm['scale'] + norm['shift']
+    try:
+        output = model.predict(data)
+        if scale:
+            output = output*norm['scale'] + norm['shift']
+    except:
+        raise Exception('Model Error: Run Error in Model. Try re-downloading the model file')
     return output
 
