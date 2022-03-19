@@ -44,11 +44,11 @@ To visualize the outputs basemap library is required, which needs to following l
 
 1. Test case 1:
 
-![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_30.54711887_-92.28496258.gif)
+![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/latest_nowcast_display_30.54711887_-92.28496258.gif)
 
 2. Test case 2:
 
-![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/nowcast_display_37.318363_-84.224203.gif)
+![](https://github.com/krishna-aditi/Nowcast-API-using-FastAPI/blob/main/reports/figures/latest_nowcast_display_30.58070007_-91.57206541.gif)
 
 #### References
 
