@@ -2,10 +2,6 @@
  "lat":37.318363,
  "lon":-84.224203, 
  "time_utc":"2019-06-02 18:33:00",
- "out_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-4\\output",
- "catalog_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-4\\CATALOG.csv",
- "data_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-4\\sevir",
- "model_path":"C:\\Users\\krish\\Documents\\Northeastern University\\Spring22\\DAMG 7245\\Assignment-4\\models\\nowcast",
  "model_type":"gan",
  "closest_radius: "True"
 }
